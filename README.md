@@ -27,7 +27,7 @@ Este proyecto es un chatbot interactivo diseñado para:
 
 ## 🌐 Cómo acceder  
 El chatbot está desplegado en:  
-🔗 [https://tuusuario.github.io/chatbot-ia-colegio-cuauhtemoc/](https://tuusuario.github.io/chatbot-ia-colegio-cuauhtemoc/)  
+🔗 [https://ColCuauhtemoc123.github.io/chatbot-ia-colegio-cuauhtemoc/](https://tuusuario.github.io/chatbot-ia-colegio-cuauhtemoc/)  
 
 ## 📌 ¿Cómo contribuir?  
 1. Haz fork de este repositorio  
