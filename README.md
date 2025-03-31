@@ -38,4 +38,4 @@ El chatbot está desplegado en:
 Este proyecto está bajo licencia MIT.  
 
 ---  
-*Desarrollado para el Colegio Cuauhtémoc con fines educativos.*  
+*Desarrollado para el Colegio Cuauhtémoc/CDMX/Centro Histórico con fines educativos.*  
