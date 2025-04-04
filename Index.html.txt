@@ -1,0 +1,2866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IA Colegio Cuauhtémoc V2.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1565C0;
+            --secondary-color: #FF6D00;
+            --accent-color: #2196F3;
+            --light-color: #ECEFF1;
+            --dark-color: #455A64;
+            --text-light: #FFFFFF;
+            --text-dark: #263238;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --error-color: #F44336;
+        }
+        
+        [data-theme="dark"] {
+            --primary-color: #0D47A1;
+            --secondary-color: #FF8F00;
+            --accent-color: #42A5F5;
+            --light-color: #37474F;
+            --dark-color: #263238;
+            --text-light: #E0E0E0;
+            --text-dark: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: linear-gradient(to right bottom, var(--light-color), var(--dark-color));
+            touch-action: manipulation;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+        
+        /* Estilos para el modal de login */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .modal-content {
+            background-color: var(--light-color);
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalFadeIn 0.3s;
+            text-align: center;
+            position: relative;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+        }
+        
+        .close-btn:hover {
+            color: var(--dark-color);
+        }
+        
+        .app-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .app-title img {
+            width: 40px;
+            margin-right: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #CFD8DC;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: var(--light-color);
+            color: var(--text-dark);
+        }
+        
+        .form-group input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+        
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: 100%;
+            margin: 5px 0;
+            font-size: 1rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid #CFD8DC;
+        }
+        
+        .btn-danger {
+            background-color: var(--error-color);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0.9;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0D47A1;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #CFD8DC;
+        }
+        
+        .switch-form {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+        }
+        
+        .switch-form a {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        
+        /* Estilos del chat */
+        .chat-container {
+            width: 95%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 90vh;
+            background-color: var(--light-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #CFD8DC;
+            display: none;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: var(--text-light);
+            padding: 15px 20px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid var(--secondary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header-info {
+            flex: 1;
+        }
+        
+        .chat-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .chat-header .version {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            background-color: var(--secondary-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .user-info:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .user-info span {
+            margin-left: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .user-menu {
+            position: absolute;
+            right: 20px;
+            top: 60px;
+            background-color: var(--light-color);
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+            display: none;
+            min-width: 200px;
+        }
+        
+        .user-menu.show {
+            display: block;
+        }
+        
+        .user-menu-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: var(--dark-color);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-menu-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .user-menu-item i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--light-color);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 90%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bot-message {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+            border-left: 3px solid var(--secondary-color);
+        }
+        
+        .user-message {
+            background-color: var(--dark-color);
+            color: var(--text-light);
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+            border-right: 3px solid var(--secondary-color);
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background-color: var(--light-color);
+            border-top: 1px solid #CFD8DC;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #CFD8DC;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: var(--light-color);
+            color: var(--text-dark);
+        }
+        
+        #user-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        
+        #send-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 0 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(255, 109, 0, 0.3);
+            min-width: 80px;
+        }
+        
+        #send-button:hover {
+            background-color: #E65100;
+            transform: translateY(-2px);
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background-color: var(--light-color);
+            border-radius: 18px;
+            margin-bottom: 15px;
+            align-self: flex-start;
+            font-style: italic;
+            color: var(--dark-color);
+            border-left: 3px solid var(--accent-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background-color: var(--light-color);
+            border-top: 1px solid #CFD8DC;
+            flex-wrap: wrap;
+        }
+        
+        .control-button {
+            background-color: var(--light-color);
+            border: 1px solid var(--accent-color);
+            color: var(--primary-color);
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin: 3px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .control-button:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .admin-controls {
+            display: none;
+        }
+        
+        .teacher-controls {
+            display: none;
+        }
+        
+        .system-message {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            text-align: center;
+            margin: 10px auto;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            max-width: 90%;
+            border: 1px dashed var(--accent-color);
+        }
+        
+        /* Modal de gestión de usuarios */
+        .users-modal {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .users-modal-content {
+            background-color: var(--light-color);
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalFadeIn 0.3s;
+        }
+        
+        .users-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .users-modal-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            overflow-x: auto;
+            display: block;
+        }
+        
+        .users-table th, .users-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .users-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .users-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .users-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            margin: 2px;
+        }
+        
+        .action-btn.edit {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+        
+        .action-btn.delete {
+            background-color: var(--error-color);
+            color: white;
+        }
+        
+        .action-btn.promote {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .add-user-btn {
+            margin-top: 15px;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-user-btn:hover {
+            background-color: #0D47A1;
+        }
+        
+        /* Formulario de agregar/editar usuario */
+        .user-form {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        /* Panel de administración */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .admin-panel-content {
+            background-color: var(--light-color);
+            margin: 2% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 1000px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalFadeIn 0.3s;
+        }
+        
+        .admin-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .admin-panel-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            background-color: #f1f1f1;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: #ddd;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .knowledge-table, .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            overflow-x: auto;
+            display: block;
+        }
+        
+        .knowledge-table th, .knowledge-table td,
+        .metrics-table th, .metrics-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .knowledge-table th, .metrics-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .knowledge-table tr:nth-child(even),
+        .metrics-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .knowledge-table tr:hover,
+        .metrics-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .export-import-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .config-section {
+            margin-top: 20px;
+        }
+        
+        .config-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .config-item h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        /* Wikipedia results */
+        .wikipedia-result {
+            background-color: #f8f9fa;
+            border: 1px solid #a2a9b1;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .wikipedia-title {
+            color: #0645ad;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .wikipedia-extract {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .wikipedia-link {
+            display: inline-block;
+            margin-top: 5px;
+            color: #0645ad;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+        
+        .wikipedia-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Botones de acción en mensajes */
+        .message-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .message-action-btn {
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 12px;
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .message-action-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background-color: var(--success-color);
+        }
+        
+        .toast.error {
+            background-color: var(--error-color);
+        }
+        
+        .toast.warning {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 20% auto;
+                padding: 15px;
+            }
+            
+            .app-title {
+                font-size: 1.5rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .users-modal-content, .admin-panel-content {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            .users-table th, .users-table td,
+            .knowledge-table th, .knowledge-table td,
+            .metrics-table th, .metrics-table td {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+            
+            .tab {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .user-info span {
+                display: none;
+            }
+            
+            .user-menu {
+                right: 10px;
+                min-width: 180px;
+            }
+            
+            .message {
+                max-width: 85%;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            #send-button {
+                padding: 0 15px;
+                min-width: 70px;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .control-button {
+                margin: 2px;
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+            
+            .chat-container {
+                height: 95vh;
+                width: 98%;
+                border-radius: 10px;
+            }
+            
+            .chat-header {
+                padding: 10px 15px;
+            }
+            
+            .chat-header h1 {
+                font-size: 1rem;
+            }
+            
+            .chat-messages {
+                padding: 10px;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .chat-input {
+                padding: 10px;
+            }
+            
+            #user-input {
+                padding: 10px 12px;
+            }
+            
+            #send-button {
+                padding: 0 12px;
+                font-size: 0.9rem;
+            }
+            
+            .user-actions {
+                flex-direction: column;
+                gap: 3px;
+            }
+            
+            .action-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        /* Prevent zoom on input focus in mobile */
+        @media screen and (-webkit-min-device-pixel-ratio:0) {
+            select:focus,
+            textarea:focus,
+            input:focus {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+</head>
+<body>
+    <!-- Toast notifications -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Modal de Login -->
+    <div id="loginModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <div class="app-title">
+                <i class="fas fa-robot" style="font-size: 2rem; color: var(--primary-color);"></i>
+                <div>
+                    <div>IA Colegio Cuauhtémoc</div>
+                    <div class="version">Versión 2.0</div>
+                </div>
+            </div>
+            
+            <!-- Formulario de Login -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="loginUser"><i class="fas fa-user"></i> Usuario:</label>
+                    <input type="text" id="loginUser" placeholder="Ingresa tu usuario">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword"><i class="fas fa-lock"></i> Contraseña:</label>
+                    <input type="password" id="loginPassword" placeholder="Ingresa tu contraseña">
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Ingresar
+                    </button>
+                    
+                    <div class="switch-form">
+                        ¿No tienes cuenta? <a id="showRegister">Crear nueva cuenta</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulario de Registro -->
+            <div id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="regUser"><i class="fas fa-user"></i> Usuario:</label>
+                    <input type="text" id="regUser" placeholder="Crea un nombre de usuario">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPassword"><i class="fas fa-lock"></i> Contraseña:</label>
+                    <input type="password" id="regPassword" placeholder="Crea una contraseña">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regEmail"><i class="fas fa-envelope"></i> Correo Electrónico:</label>
+                    <input type="email" id="regEmail" placeholder="tucorreo@ejemplo.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPhone"><i class="fas fa-phone"></i> Teléfono (opcional):</label>
+                    <input type="tel" id="regPhone" placeholder="5512345678" pattern="[0-9]{10}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regUserType">Tipo de Usuario:</label>
+                    <select id="regUserType" style="width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #CFD8DC;">
+                        <option value="student">Alumno</option>
+                        <option value="teacher">Profesor</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="registerBtn">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </button>
+                    
+                    <div class="switch-form">
+                        ¿Ya tienes cuenta? <a id="showLogin">Iniciar sesión</a>
+                    </div>
+                </div>
+            </div>
+            
+            <p id="errorMsg" style="color: var(--error-color); margin-top: 10px; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Contenedor del Chat -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <h1>IA Colegio Cuauhtémoc <i class="fas fa-robot"></i></h1>
+                <span class="version">V2.0</span>
+            </div>
+            
+            <div class="user-info" id="userInfoBtn">
+                <i class="fas fa-user-circle"></i>
+                <span id="userName"></span>
+                <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+            </div>
+            
+            <div class="user-menu" id="userMenu">
+                <div class="user-menu-item" id="profileMenuItem" onclick="showUserProfile()">
+                    <i class="fas fa-user"></i> Mi perfil
+                </div>
+                <div class="user-menu-item" id="manageUsersBtn" onclick="manageUsers()">
+                    <i class="fas fa-users-cog"></i> Gestionar usuarios
+                </div>
+                <div class="user-menu-item" id="adminPanelBtn" onclick="openAdminPanel()">
+                    <i class="fas fa-tools"></i> Panel de administración
+                </div>
+                <div class="user-menu-item" id="logoutMenuItem" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <div class="typing-indicator" id="typing-indicator">
+                <i class="fas fa-ellipsis-h"></i> El asistente está escribiendo...
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-button admin-controls" onclick="clearMemory()">
+                <i class="fas fa-trash-alt"></i> Borrar Memoria
+            </button>
+            <button class="control-button teacher-controls" onclick="addKnowledge()">
+                <i class="fas fa-plus-circle"></i> Añadir Conocimiento
+            </button>
+            <button class="control-button" onclick="searchWikipedia()">
+                <i class="fas fa-search"></i> Buscar en Wikipedia
+            </button>
+            <button class="control-button admin-controls" onclick="toggleTheme()">
+                <i class="fas fa-palette"></i> Cambiar Tema
+            </button>
+            <button class="control-button" onclick="showHelp()">
+                <i class="fas fa-question-circle"></i> Ayuda
+            </button>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Escribe tu mensaje..." autocomplete="off">
+            <button id="send-button" onclick="sendMessage()">
+                Enviar <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Gestión de Usuarios -->
+    <div id="usersModal" class="users-modal">
+        <div class="users-modal-content">
+            <div class="users-modal-header">
+                <h2 class="users-modal-title">
+                    <i class="fas fa-users-cog"></i> Gestión de Usuarios
+                </h2>
+                <span class="close-btn" id="closeUsersModal">&times;</span>
+            </div>
+            
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Correo</th>
+                        <th>Tipo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Usuarios se cargarán aquí -->
+                </tbody>
+            </table>
+            
+            <button class="btn btn-primary add-user-btn" onclick="showAddUserForm()">
+                <i class="fas fa-user-plus"></i> Agregar Usuario
+            </button>
+            
+            <div id="addUserForm" class="user-form">
+                <h3><i class="fas fa-plus-circle"></i> Agregar Nuevo Usuario</h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="newUserName">Usuario:</label>
+                            <input type="text" id="newUserName" placeholder="Nombre de usuario">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="newUserPassword">Contraseña:</label>
+                            <input type="password" id="newUserPassword" placeholder="Contraseña">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="newUserEmail">Correo Electrónico:</label>
+                            <input type="email" id="newUserEmail" placeholder="correo@ejemplo.com">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="newUserPhone">Teléfono:</label>
+                            <input type="tel" id="newUserPhone" placeholder="5512345678">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newUserType">Tipo de Usuario:</label>
+                    <select id="newUserType" style="width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #CFD8DC;">
+                        <option value="student">Alumno</option>
+                        <option value="teacher">Profesor</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="cancelAddUser()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-primary" onclick="saveNewUser()">
+                        <i class="fas fa-save"></i> Guardar Usuario
+                    </button>
+                </div>
+            </div>
+            
+            <div id="editUserForm" class="user-form">
+                <h3><i class="fas fa-edit"></i> Editar Usuario</h3>
+                <input type="hidden" id="editUserId">
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="editUserName">Usuario:</label>
+                            <input type="text" id="editUserName" placeholder="Nombre de usuario">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="editUserPassword">Contraseña (dejar en blanco para no cambiar):</label>
+                            <input type="password" id="editUserPassword" placeholder="Nueva contraseña">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="editUserEmail">Correo Electrónico:</label>
+                            <input type="email" id="editUserEmail" placeholder="correo@ejemplo.com">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="editUserPhone">Teléfono:</label>
+                            <input type="tel" id="editUserPhone" placeholder="5512345678">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editUserType">Tipo de Usuario:</label>
+                    <select id="editUserType" style="width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #CFD8DC;">
+                        <option value="student">Alumno</option>
+                        <option value="teacher">Profesor</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="cancelEditUser()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-primary" onclick="updateUser()">
+                        <i class="fas fa-save"></i> Actualizar Usuario
+                    </button>
+                </div>
+            </div>
+            
+            <p id="usersErrorMsg" style="color: var(--error-color); margin-top: 10px; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Panel de Administración -->
+    <div id="adminPanel" class="admin-panel">
+        <div class="admin-panel-content">
+            <div class="admin-panel-header">
+                <h2 class="admin-panel-title">
+                    <i class="fas fa-tools"></i> Panel de Administración
+                </h2>
+                <span class="close-btn" id="closeAdminPanel">&times;</span>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab active" onclick="changeTab('metrics')">
+                    <i class="fas fa-chart-line"></i> Métricas
+                </div>
+                <div class="tab" onclick="changeTab('users')">
+                    <i class="fas fa-users"></i> Usuarios
+                </div>
+                <div class="tab" onclick="changeTab('knowledge')">
+                    <i class="fas fa-brain"></i> Conocimiento
+                </div>
+                <div class="tab" onclick="changeTab('apis')">
+                    <i class="fas fa-plug"></i> APIs
+                </div>
+                <div class="tab" onclick="changeTab('config')">
+                    <i class="fas fa-cog"></i> Configuración
+                </div>
+            </div>
+            
+            <!-- Pestaña de Métricas -->
+            <div id="metricsTab" class="tab-content active">
+                <h3><i class="fas fa-chart-pie"></i> Estadísticas del Sistema</h3>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metricsTableBody">
+                        <tr>
+                            <td>Total de Usuarios</td>
+                            <td id="totalUsers">0</td>
+                        </tr>
+                        <tr>
+                            <td>Administradores</td>
+                            <td id="adminUsers">0</td>
+                        </tr>
+                        <tr>
+                            <td>Profesores</td>
+                            <td id="teacherUsers">0</td>
+                        </tr>
+                        <tr>
+                            <td>Alumnos</td>
+                            <td id="studentUsers">0</td>
+                        </tr>
+                        <tr>
+                            <td>Total de Interacciones</td>
+                            <td id="totalInteractions">0</td>
+                        </tr>
+                        <tr>
+                            <td>Conocimiento Almacenado</td>
+                            <td id="knowledgeCount">0 items</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="export-import-section">
+                    <h3><i class="fas fa-file-export"></i> Exportar/Importar Datos</h3>
+                    <button class="btn btn-primary" onclick="exportAllData()">
+                        <i class="fas fa-download"></i> Exportar Todos los Datos
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportUsersCSV()" style="margin-left: 10px;">
+                        <i class="fas fa-file-csv"></i> Exportar Usuarios (CSV)
+                    </button>
+                    
+                    <div style="margin-top: 15px;">
+                        <label for="importData" style="display: block; margin-bottom: 5px;">
+                            <i class="fas fa-file-import"></i> Importar Datos:
+                        </label>
+                        <input type="file" id="importData" accept=".json" style="margin-bottom: 10px;">
+                        <button class="btn btn-primary" onclick="importData()">
+                            <i class="fas fa-upload"></i> Importar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pestaña de Usuarios -->
+            <div id="usersTab" class="tab-content">
+                <h3><i class="fas fa-users"></i> Gestión de Usuarios</h3>
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Correo</th>
+                            <th>Tipo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminUsersTableBody">
+                        <!-- Usuarios se cargarán aquí -->
+                    </tbody>
+                </table>
+                
+                <button class="btn btn-primary add-user-btn" onclick="showAdminAddUserForm()">
+                    <i class="fas fa-user-plus"></i> Agregar Usuario
+                </button>
+            </div>
+            
+            <!-- Pestaña de Conocimiento -->
+            <div id="knowledgeTab" class="tab-content">
+                <h3><i class="fas fa-brain"></i> Base de Conocimiento</h3>
+                <button class="btn btn-primary" onclick="addKnowledgeItem()">
+                    <i class="fas fa-plus"></i> Añadir Nuevo Conocimiento
+                </button>
+                
+                <table class="knowledge-table">
+                    <thead>
+                        <tr>
+                            <th>Pregunta</th>
+                            <th>Respuesta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="knowledgeTableBody">
+                        <!-- Conocimiento se cargará aquí -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pestaña de APIs -->
+            <div id="apisTab" class="tab-content">
+                <h3><i class="fas fa-plug"></i> Configuración de APIs</h3>
+                
+                <div class="config-item">
+                    <h3><i class="fab fa-wikipedia-w"></i> Wikipedia</h3>
+                    <div class="form-group">
+                        <label for="wikipediaEnabled">Habilitar Wikipedia:</label>
+                        <input type="checkbox" id="wikipediaEnabled" checked>
+                    </div>
+                    <div class="form-group">
+                        <label for="wikipediaLanguage">Idioma:</label>
+                        <select id="wikipediaLanguage">
+                            <option value="es">Español</option>
+                            <option value="en">Inglés</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveWikipediaConfig()">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+                
+                <table class="apis-table">
+                    <thead>
+                        <tr><th>API</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody id="apisTableBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- Pestaña de Configuración -->
+            <div id="configTab" class="tab-content">
+                <h3><i class="fas fa-cog"></i> Configuración del Sistema</h3>
+                
+                <div class="config-section">
+                    <div class="config-item">
+                        <h3><i class="fas fa-shield-alt"></i> Permisos</h3>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="allowStudentLearning">
+                                Permitir a alumnos aprender nuevas respuestas
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="allowTeacherUserManagement">
+                                Permitir a profesores gestionar usuarios
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" onclick="savePermissions()">
+                            <i class="fas fa-save"></i> Guardar Configuración
+                        </button>
+                    </div>
+                    
+                    <div class="config-item">
+                        <h3><i class="fas fa-robot"></i> Configuración del Chatbot</h3>
+                        <div class="form-group">
+                            <label for="botName">Nombre del Bot:</label>
+                            <input type="text" id="botName" value="IA Colegio Cuauhtémoc" style="width: 100%;">
+                        </div>
+                        <div class="form-group">
+                            <label for="welcomeMessage">Mensaje de Bienvenida:</label>
+                            <textarea id="welcomeMessage" style="width: 100%; height: 100px;">¡Hola! 👋 Soy la IA del Colegio Cuauhtémoc, versión 2.0 🎓\n¿En qué puedo ayudarte hoy? 💡</textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveBotConfig()">
+                            <i class="fas fa-save"></i> Guardar Configuración
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <p id="adminErrorMsg" style="color: var(--error-color); margin-top: 10px; display: none;"></p>
+        </div>
+    </div>
+
+    <script>
+        // Función para sanitizar input
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+
+        // Credenciales de administrador
+        const ADMIN_CREDENTIALS = {
+            username: "admin",
+            password: sha256("Cuauth3m0c2025"),
+            email: "admin@colegiocuauhtemoc.edu.mx",
+            phone: "5512345678",
+            name: "Administrador",
+            type: "admin",
+            createdAt: new Date().toISOString()
+        };
+
+        // Datos iniciales del chatbot con información del Colegio Cuauhtémoc
+        const initialKnowledge = [
+            { 
+                question: "hola|saludos|buenos días|buenas tardes", 
+                answer: "¡Hola! 👋 Soy la IA del Colegio Cuauhtémoc. ¿En qué puedo ayudarte hoy? 📚\n\nPuedes preguntarme sobre:\n- Ubicación del colegio 🏫\n- Horarios ⏰\n- Teléfonos 📞\n- Servicios educativos 🎓\n\nSi necesitas más información sobre algún tema, usa el comando 'buscar [tema]' 🔍" 
+            },
+            { 
+                question: "ubicacion|dirección|domicilio|dónde está ubicado", 
+                answer: "📍 <strong>Ubicación del Colegio Cuauhtémoc</strong>\n\nNuestro Colegio se ubica en pleno Centro Histórico de la Ciudad de México, en la calle de Belisario Domínguez No. 36, entre Allende y República de Chile.\n\n¿Quieres ver un mapa de la ubicación? Puedes usar el comando 'buscar mapa colegio cuauhtémoc' 🗺️" 
+            },
+            { 
+                question: "horarios|horario", 
+                answer: "⏰ <strong>Horarios del Colegio:</strong>\n\n" +
+                       "<b>Jardín de Niños (Kínder):</b>\n" +
+                       "- 1° y 2°: 08:30 a 14:00 hrs\n" +
+                       "- 3°: 08:00 a 14:00 hrs\n\n" +
+                       "<b>Primaria:</b>\n" +
+                       "- 07:45 a 14:45 hrs (Lunes a Viernes)\n\n" +
+                       "<b>Secundaria:</b>\n" +
+                       "- Lunes a Jueves: 07:30 a 15:00 hrs\n" +
+                       "- Viernes: 07:30 a 14:00 hrs\n\n" +
+                       "¿Necesitas información más específica sobre algún horario en particular?" 
+            },
+            { 
+                question: "teléfonos|contacto|números", 
+                answer: "📞 <strong>Teléfonos del Colegio:</strong>\n\n" +
+                       "<b>Jardín de Niños:</b> 55 57 72 63 33\n\n" +
+                       "<b>Primaria:</b>\n" +
+                       "- 55 12 72 55 04\n" +
+                       "- 55 55 26 03 40\n\n" +
+                       "<b>Secundaria:</b> 55 21 21 64 62\n\n" +
+                       "¿Quieres contactar a algún departamento en específico?" 
+            },
+            { 
+                question: "servicios|niveles educativos", 
+                answer: "🏫 <strong>Servicios Educativos:</strong>\n\n" +
+                       "- <b>Jardín de Niños (Kínder)</b> - ACUERDO: PRER-09180048\n" +
+                       "- <b>Primaria</b> - ACUERDO: PRIR-09100146CT\n" +
+                       "- <b>Secundaria</b> - ACUERDO: SECR-09170084\n\n" +
+                       "¿Te gustaría saber más sobre alguno de estos niveles educativos?" 
+            },
+            { 
+                question: "gracias|muchas gracias|agradecido", 
+                answer: "¡De nada! 😊 Estoy aquí para ayudar. ¿Necesitas algo más? 💡\n\nRecuerda que si necesitas información más detallada sobre algún tema, puedes usar el comando 'buscar [tema]' 🔍" 
+            },
+            { 
+                question: "wikipedia|buscar en wikipedia|consulta wikipedia", 
+                answer: "🔍 Puedes buscar información en Wikipedia usando el botón 'Buscar en Wikipedia' o escribiendo 'buscar [tema]'. Por ejemplo:\n\n'buscar historia de méxico'\n'buscar matemáticas algebra'\n'buscar física cuántica'\n\n¿Sobre qué tema te gustaría buscar información?" 
+            },
+            { 
+                question: "materias|asignaturas|qué materias hay", 
+                answer: "📚 <strong>Materias que impartimos:</strong>\n\n" +
+                       "<b>Primaria:</b>\n" +
+                       "- Español\n- Matemáticas\n- Ciencias Naturales\n- Historia\n- Geografía\n- Formación Cívica y Ética\n- Educación Física\n- Artes\n\n" +
+                       "<b>Secundaria:</b>\n" +
+                       "- Español\n- Matemáticas\n- Biología\n- Física\n- Química\n- Historia\n- Geografía\n- Formación Cívica y Ética\n- Inglés\n- Tecnología\n- Educación Física\n- Artes\n\n" +
+                       "¿Quieres más detalles sobre alguna materia en particular?" 
+            },
+            { 
+                question: "requisitos|inscripción|cómo inscribirme", 
+                answer: "📝 <strong>Requisitos de Inscripción:</strong>\n\n" +
+                       "Para inscribir a tu hijo/a en nuestro colegio, necesitarás:\n\n" +
+                       "1. Acta de nacimiento (original y copia)\n" +
+                       "2. CURP (copia)\n" +
+                       "3. Cartilla de vacunación (copia)\n" +
+                       "4. Comprobante de domicilio\n" +
+                       "5. Fotografías tamaño infantil\n\n" +
+                       "Para mayores informes, puedes comunicarte a los teléfonos que aparecen en la sección de contacto o visitarnos en nuestro plantel." 
+            },
+            { 
+                question: "costos|colegiaturas|cuotas", 
+                answer: "💰 <strong>Información sobre costos:</strong>\n\n" +
+                       "Los costos varían según el nivel educativo. Para obtener información detallada y actualizada sobre colegiaturas, cuotas y formas de pago, te recomendamos:\n\n" +
+                       "1. Visitar la administración del colegio\n" +
+                       "2. Llamar a los teléfonos de contacto\n" +
+                       "3. Solicitar una cita con el departamento financiero\n\n" +
+                       "¿Necesitas ayuda para contactar con el departamento correspondiente?" 
+            },
+            { 
+                question: "actividades extracurriculares|clubes|talleres", 
+                answer: "🎨 <strong>Actividades Extracurriculares:</strong>\n\n" +
+                       "Ofrecemos diversas actividades para el desarrollo integral de nuestros alumnos:\n\n" +
+                       "- Fútbol ⚽\n- Basquetbol 🏀\n- Danza 💃\n- Música 🎵\n- Teatro 🎭\n- Robótica 🤖\n- Ajedrez ♟️\n- Pintura 🎨\n\n" +
+                       "Los talleres varían por temporada y nivel educativo. ¿Te gustaría saber qué talleres están disponibles actualmente?" 
+            }
+        ];
+
+        // Variables del sistema
+        let aprendiendo = false;
+        let conocimiento = [];
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('chatUsers')) || [];
+        let editingUserId = null;
+        let totalInteractions = parseInt(localStorage.getItem('totalInteractions')) || 0;
+        let systemConfig = JSON.parse(localStorage.getItem('systemConfig')) || {
+            allowStudentLearning: false,
+            allowTeacherUserManagement: false,
+            botName: "IA Colegio Cuauhtémoc",
+            welcomeMessage: "¡Hola! 👋 Soy la IA del Colegio Cuauhtémoc, versión 2.0 🎓\n¿En qué puedo ayudarte hoy? 💡"
+        };
+
+        // Configuración de APIs
+        let apiConfig = JSON.parse(localStorage.getItem('apiConfig')) || {
+            wikipedia: { enabled: true, language: 'es' }
+        };
+
+        // Elementos del DOM
+        const loginModal = document.getElementById('loginModal');
+        const chatContainer = document.getElementById('chatContainer');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const closeModal = document.getElementById('closeModal');
+        const errorMsg = document.getElementById('errorMsg');
+        const userInfoBtn = document.getElementById('userInfoBtn');
+        const userMenu = document.getElementById('userMenu');
+        const userName = document.getElementById('userName');
+        const usersModal = document.getElementById('usersModal');
+        const closeUsersModal = document.getElementById('closeUsersModal');
+        const usersTableBody = document.getElementById('usersTableBody');
+        const addUserForm = document.getElementById('addUserForm');
+        const editUserForm = document.getElementById('editUserForm');
+        const usersErrorMsg = document.getElementById('usersErrorMsg');
+        const adminPanel = document.getElementById('adminPanel');
+        const closeAdminPanel = document.getElementById('closeAdminPanel');
+        const toast = document.getElementById('toast');
+
+        // Aplicar tema al cargar
+        if (currentTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+
+        // Event Listeners
+        loginBtn.addEventListener('click', handleLogin);
+        registerBtn.addEventListener('click', handleRegister);
+        showRegister.addEventListener('click', () => toggleForms(false));
+        showLogin.addEventListener('click', () => toggleForms(true));
+        closeModal.addEventListener('click', closeLoginModal);
+        closeUsersModal.addEventListener('click', closeUsersModalWindow);
+        closeAdminPanel.addEventListener('click', closeAdminPanelWindow);
+        userInfoBtn.addEventListener('click', toggleUserMenu);
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) closeLoginModal();
+            if (e.target === usersModal) closeUsersModalWindow();
+            if (e.target === adminPanel) closeAdminPanelWindow();
+            if (!e.target.closest('.user-info') && !e.target.closest('.user-menu')) {
+                userMenu.classList.remove('show');
+            }
+        });
+
+        // Mostrar notificación toast
+        function showToast(message, type = 'success', duration = 3000) {
+            toast.textContent = message;
+            toast.className = 'toast';
+            toast.classList.add(type);
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // Inicializar usuarios si no existen
+        function initializeUsers() {
+            if (users.length === 0) {
+                users.push(ADMIN_CREDENTIALS);
+                localStorage.setItem('chatUsers', JSON.stringify(users));
+            } else {
+                // Verificar y corregir usuario admin si es necesario
+                const adminUser = users.find(u => u.username === ADMIN_CREDENTIALS.username);
+                if (!adminUser) {
+                    users.push(ADMIN_CREDENTIALS);
+                    localStorage.setItem('chatUsers', JSON.stringify(users));
+                } else if (adminUser.type !== 'admin') {
+                    adminUser.type = 'admin';
+                    localStorage.setItem('chatUsers', JSON.stringify(users));
+                }
+            }
+        }
+
+        // Configurar menú de usuario
+        function configureUserMenu() {
+            // Configurar visibilidad de elementos del menú
+            const menuItems = {
+                profile: document.getElementById('profileMenuItem'),
+                manageUsers: document.getElementById('manageUsersBtn'),
+                adminPanel: document.getElementById('adminPanelBtn'),
+                logout: document.getElementById('logoutMenuItem')
+            };
+
+            // Aplicar display flex a todos los elementos para consistencia
+            Object.values(menuItems).forEach(item => {
+                item.style.display = "flex";
+            });
+
+            // Configurar visibilidad según permisos
+            menuItems.manageUsers.style.display = 
+                currentUser.type === 'admin' || 
+                (currentUser.type === 'teacher' && systemConfig.allowTeacherUserManagement) 
+                ? "flex" : "none";
+            
+            menuItems.adminPanel.style.display = 
+                currentUser.type === 'admin' ? "flex" : "none";
+        }
+
+        // Función para alternar entre formularios
+        function toggleForms(showLoginForm) {
+            loginForm.style.display = showLoginForm ? 'block' : 'none';
+            registerForm.style.display = showLoginForm ? 'none' : 'block';
+            errorMsg.style.display = 'none';
+        }
+
+        // Función para mostrar/ocultar menú de usuario
+        function toggleUserMenu() {
+            userMenu.classList.toggle('show');
+        }
+
+        // Función para manejar el login
+        function handleLogin() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !password) {
+                showError("⚠️ Usuario y contraseña son obligatorios");
+                return;
+            }
+
+            // Buscar usuario en la lista local
+            const user = users.find(u => u.username === username);
+            
+            if (user && user.password === sha256(password)) {
+                currentUser = user;
+                startChat();
+                showToast(`Bienvenido ${user.name}`, 'success');
+            } else {
+                showError("❌ Usuario o contraseña incorrectos");
+            }
+        }
+
+        // Función para manejar el registro
+        function handleRegister() {
+            const username = document.getElementById('regUser').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const userType = document.getElementById('regUserType').value;
+
+            if (!username || !password || !email) {
+                showError("⚠️ Usuario, contraseña y correo son obligatorios");
+                return;
+            }
+
+            if (username.length < 4) {
+                showError("👤 El usuario debe tener al menos 4 caracteres");
+                return;
+            }
+
+            if (password.length < 6) {
+                showError("🔑 La contraseña debe tener al menos 6 caracteres");
+                return;
+            }
+
+            if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+                showError("📧 Por favor ingresa un correo válido");
+                return;
+            }
+
+            if (phone && (phone.length !== 10 || !/^\d+$/.test(phone))) {
+                showError("📱 El teléfono debe tener 10 dígitos o dejarse vacío");
+                return;
+            }
+
+            if (users.some(u => u.username === username)) {
+                showError("👤 Este nombre de usuario ya está en uso");
+                return;
+            }
+
+            const newUser = {
+                username,
+                password: sha256(password),
+                email,
+                phone: phone || "No especificado",
+                name: username,
+                type: userType,
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('chatUsers', JSON.stringify(users));
+            
+            showError("✅ Registro exitoso! Serás redirigido...", 'success');
+            showToast("Cuenta creada exitosamente", 'success');
+            
+            setTimeout(() => {
+                currentUser = newUser;
+                startChat();
+            }, 1500);
+        }
+
+        // Función para mostrar errores
+        function showError(message, type = 'error') {
+            errorMsg.textContent = message;
+            errorMsg.style.color = type === 'error' ? 'var(--error-color)' : 'var(--success-color)';
+            errorMsg.style.display = "block";
+            setTimeout(() => {
+                errorMsg.style.display = "none";
+            }, 3000);
+        }
+
+        // Función para mostrar errores en gestión de usuarios
+        function showUsersError(message, type = 'error') {
+            usersErrorMsg.textContent = message;
+            usersErrorMsg.style.color = type === 'error' ? 'var(--error-color)' : 'var(--success-color)';
+            usersErrorMsg.style.display = "block";
+            setTimeout(() => {
+                usersErrorMsg.style.display = "none";
+            }, 3000);
+        }
+
+        // Función para mostrar errores en panel de admin
+        function showAdminError(message, type = 'error') {
+            const adminErrorMsg = document.getElementById('adminErrorMsg');
+            adminErrorMsg.textContent = message;
+            adminErrorMsg.style.color = type === 'error' ? 'var(--error-color)' : 'var(--success-color)';
+            adminErrorMsg.style.display = "block";
+            setTimeout(() => {
+                adminErrorMsg.style.display = "none";
+            }, 3000);
+        }
+
+        // Función para cerrar el modal de login
+        function closeLoginModal() {
+            loginModal.style.display = "none";
+        }
+
+        // Función para iniciar el chat
+        function startChat() {
+            closeLoginModal();
+            loadData();
+            chatContainer.style.display = "flex";
+            
+            userName.textContent = currentUser.name;
+            
+            // Configurar menú de usuario
+            configureUserMenu();
+            
+            // Mostrar controles según tipo de usuario
+            document.querySelectorAll('.admin-controls').forEach(el => {
+                el.style.display = currentUser.type === 'admin' ? "block" : "none";
+            });
+            
+            document.querySelectorAll('.teacher-controls').forEach(el => {
+                el.style.display = currentUser.type === 'teacher' || currentUser.type === 'admin' ? "block" : "none";
+            });
+            
+            // Mensaje de bienvenida personalizado
+            let welcomeMessage = systemConfig.welcomeMessage;
+            if (currentUser.type === 'admin') {
+                welcomeMessage += "\n🔓 Modo administrador activado. Tienes acceso a todas las funciones.";
+            } else if (currentUser.type === 'teacher') {
+                welcomeMessage += "\n👨‍🏫 Modo profesor activado. Puedes añadir conocimiento al sistema.";
+            } else {
+                welcomeMessage += "\n👋 Escribe 'ayuda' para ver las opciones disponibles.";
+            }
+            
+            addMessageToChat("IA: " + welcomeMessage, 'bot');
+            
+            // Incrementar contador de interacciones
+            totalInteractions++;
+            localStorage.setItem('totalInteractions', totalInteractions);
+        }
+
+        // Función para logout
+        function logout() {
+            if (confirm("¿Estás seguro que quieres salir? 🚪")) {
+                currentUser = null;
+                chatContainer.style.display = "none";
+                loginModal.style.display = "block";
+                toggleForms(true);
+                resetForms();
+                userMenu.classList.remove('show');
+                showToast("Sesión cerrada correctamente", 'success');
+            }
+        }
+
+        // Función para resetear formularios
+        function resetForms() {
+            document.getElementById('loginUser').value = "";
+            document.getElementById('loginPassword').value = "";
+            document.getElementById('regUser').value = "";
+            document.getElementById('regPassword').value = "";
+            document.getElementById('regEmail').value = "";
+            document.getElementById('regPhone').value = "";
+        }
+
+        // Cargar datos del chatbot
+        function loadData() {
+            const savedData = localStorage.getItem('iaColegioData');
+            if (savedData) {
+                conocimiento = JSON.parse(savedData);
+            } else {
+                conocimiento = [...initialKnowledge];
+            }
+        }
+
+        // Guardar datos
+        function saveData() {
+            localStorage.setItem('iaColegioData', JSON.stringify(conocimiento));
+        }
+
+        // Añadir mensaje al chat
+        function addMessageToChat(message, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            
+            if (sender === 'system') {
+                messageElement.classList.add('system-message');
+            } else {
+                messageElement.classList.add('message');
+                messageElement.classList.add(sender + '-message');
+            }
+            
+            messageElement.innerHTML = emojify(message.replace('IA: ', '').replace('Usuario: ', ''));
+            
+            // Agregar botones de acción para mensajes del bot
+            if (sender === 'bot') {
+                const messageText = message.toLowerCase();
+                
+                // Solo agregar botones si no es un mensaje de sistema o ayuda
+                if (!messageText.includes('modo administrador') && 
+                    !messageText.includes('modo profesor') && 
+                    !messageText.includes('escribe "ayuda"') &&
+                    !messageText.includes('comandos disponibles')) {
+                    
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'message-actions';
+                    
+                    // Botón de búsqueda en Wikipedia
+                    if (messageText.includes('ubicación') || 
+                        messageText.includes('horario') || 
+                        messageText.includes('materias') || 
+                        messageText.includes('servicios')) {
+                        
+                        const searchTerm = messageText.includes('ubicación') ? 'colegio cuauhtémoc ubicación' :
+                                          messageText.includes('horario') ? 'horarios escolares' :
+                                          messageText.includes('materias') ? 'plan de estudios educación básica' :
+                                          messageText.includes('servicios') ? 'servicios educativos' : '';
+                        
+                        if (searchTerm) {
+                            const searchBtn = document.createElement('button');
+                            searchBtn.className = 'message-action-btn';
+                            searchBtn.innerHTML = '<i class="fas fa-search"></i> Buscar más info';
+                            searchBtn.onclick = () => {
+                                addMessageToChat(`Usuario: buscar ${searchTerm}`, 'user');
+                                fetchWikipediaData(searchTerm);
+                            };
+                            actionsDiv.appendChild(searchBtn);
+                        }
+                    }
+                    
+                    // Botón de ayuda
+                    const helpBtn = document.createElement('button');
+                    helpBtn.className = 'message-action-btn';
+                    helpBtn.innerHTML = '<i class="fas fa-question-circle"></i> Ayuda';
+                    helpBtn.onclick = showHelp;
+                    actionsDiv.appendChild(helpBtn);
+                    
+                    messageElement.appendChild(actionsDiv);
+                }
+            }
+            
+            const typingIndicator = document.getElementById('typing-indicator');
+            chatMessages.insertBefore(messageElement, typingIndicator);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Función para convertir texto a emojis
+        function emojify(text) {
+            const emojiMap = {
+                "\\?\\?": "❓",
+                "!!": "❗",
+                "!": "❕",
+                "\\?": "❔",
+                ":\\)": "😊",
+                ":\\(": "😞",
+                ":D": "😃",
+                ";\\)": "😉",
+                "<3": "❤️",
+                "\\*\\*\\*": "✨",
+                "\\*\\*": "⭐",
+                "\\*": "🌟"
+            };
+            
+            let result = text;
+            for (const [key, value] of Object.entries(emojiMap)) {
+                const regex = new RegExp(key, 'g');
+                result = result.replace(regex, value);
+            }
+            return result;
+        }
+
+        // Mostrar indicador de que está escribiendo
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.style.display = 'block';
+            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        }
+
+        // Ocultar indicador de que está escribiendo
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+
+        // Buscar en Wikipedia
+        function searchWikipedia() {
+            const query = prompt("🔍 ¿Qué deseas buscar en Wikipedia?");
+            if (!query) return;
+            
+            addMessageToChat("Usuario: buscar en wikipedia " + query, 'user');
+            fetchWikipediaData(query);
+        }
+
+        // Función mejorada para obtener datos de Wikipedia
+        async function fetchWikipediaData(query) {
+            if (!apiConfig.wikipedia.enabled) {
+                addMessageToChat("IA: Wikipedia está deshabilitada. Habilítala en el panel de administración.", 'bot');
+                return;
+            }
+            
+            try {
+                showTypingIndicator();
+                
+                const lang = apiConfig.wikipedia.language;
+                // Primero buscamos el término para obtener la página más relevante
+                const searchResponse = await fetch(
+                    `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`
+                );
+                const searchData = await searchResponse.json();
+                
+                if (searchData.query.searchinfo.totalhits === 0) {
+                    hideTypingIndicator();
+                    addMessageToChat("IA: No encontré información sobre ese tema en Wikipedia. ¿Puedes ser más específico?", 'bot');
+                    return;
+                }
+                
+                // Tomamos el primer resultado de búsqueda
+                const pageTitle = searchData.query.search[0].title;
+                
+                // Ahora obtenemos el extracto de la página
+                const pageResponse = await fetch(
+                    `https://${lang}.wikipedia.org/w/api.php?action=query&prop=extracts|info&exintro&explaintext&redirects=1&format=json&origin=*&titles=${encodeURIComponent(pageTitle)}`
+                );
+                const pageData = await pageResponse.json();
+                
+                hideTypingIndicator();
+                
+                const pages = pageData.query.pages;
+                const pageId = Object.keys(pages)[0];
+                
+                if (pageId === "-1") {
+                    addMessageToChat("IA: No encontré información sobre ese tema en Wikipedia. ¿Puedes ser más específico?", 'bot');
+                    return;
+                }
+                
+                const page = pages[pageId];
+                let extract = page.extract;
+                const title = page.title;
+                const url = `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`;
+                
+                // Limitar el extracto a 3 párrafos como máximo
+                const paragraphs = extract.split('\n');
+                if (paragraphs.length > 3) {
+                    extract = paragraphs.slice(0, 3).join('\n') + '...';
+                }
+                
+                let responseHtml = `<div class="wikipedia-result">
+                    <div class="wikipedia-title">${title}</div>
+                    <div class="wikipedia-extract">${extract || 'No hay una descripción disponible para este tema.'}</div>
+                    <a href="${url}" target="_blank" class="wikipedia-link">Leer más en Wikipedia</a>
+                </div>`;
+                
+                addMessageToChat("IA: Aquí está lo que encontré en Wikipedia sobre " + title + ":\n" + responseHtml, 'bot');
+                
+                // Guardar la consulta en el conocimiento
+                if (currentUser.type === 'admin' || currentUser.type === 'teacher') {
+                    conocimiento.push({
+                        question: `buscar ${query}|wikipedia ${query}|consulta ${query}`,
+                        answer: `📚 Información sobre ${query}:\n${responseHtml}`
+                    });
+                    saveData();
+                }
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessageToChat("IA: Ocurrió un error al buscar en Wikipedia. Por favor intenta más tarde.", 'bot');
+                console.error("Error fetching Wikipedia data:", error);
+            }
+        }
+
+        // Procesar el mensaje del usuario
+        function processMessage(message) {
+            if (aprendiendo) {
+                if (currentUser.type !== 'admin' && !(currentUser.type === 'teacher' && systemConfig.allowStudentLearning)) {
+                    return { response: "IA: ⛔ Lo siento, no tienes permisos para enseñarme nuevas respuestas.", needsFollowUp: false };
+                }
+                
+                conocimiento.push({ question: message.toLowerCase(), answer: '' });
+                saveData();
+                aprendiendo = false;
+                return { response: "IA: 🤔 ¿Cómo debería responder a eso? Por favor, dime la respuesta adecuada.", needsFollowUp: true };
+            }
+
+            // Detectar búsqueda en Wikipedia
+            if (message.toLowerCase().startsWith("buscar ")) {
+                const query = message.substring(7).trim();
+                if (query) {
+                    fetchWikipediaData(query);
+                    return { response: "IA: 🔍 Buscando información sobre " + query + " en Wikipedia...", needsFollowUp: false };
+                }
+            }
+
+            if (message.toLowerCase() === "aprender") {
+                if (currentUser.type !== 'admin' && !(currentUser.type === 'teacher' && systemConfig.allowStudentLearning)) {
+                    return { response: "IA: ⛔ No tienes permisos para esta función.", needsFollowUp: false };
+                }
+                aprendiendo = true;
+                return { response: "IA: 🧠 Modo aprendizaje activado. Por favor, dime la frase que quieres que aprenda.", needsFollowUp: false };
+            }
+
+            if (message.toLowerCase() === "borrar") {
+                if (currentUser.type !== 'admin') {
+                    return { response: "IA: ⛔ Lo siento, no tienes permisos para esta acción.", needsFollowUp: false };
+                }
+                localStorage.removeItem('iaColegioData');
+                conocimiento = [...initialKnowledge];
+                return { response: "IA: 🗑️ He borrado toda mi memoria y vuelto a los datos iniciales.", needsFollowUp: false };
+            }
+
+            if (message.toLowerCase() === "ayuda") {
+                let helpMsg = "IA: ℹ️ <strong>Comandos disponibles</strong>\n";
+                
+                if (currentUser.type === 'admin') {
+                    helpMsg += "- 'aprender' 📚: Enseñar nuevas respuestas\n";
+                    helpMsg += "- 'borrar' 🧹: Reiniciar memoria\n";
+                    helpMsg += "- 'cambiar tema' 🎨: Modificar diseño\n";
+                    helpMsg += "- 'gestionar usuarios' 👥: Administrar cuentas\n";
+                    helpMsg += "- 'panel admin' ⚙️: Abrir panel de administración\n";
+                } else if (currentUser.type === 'teacher') {
+                    if (systemConfig.allowStudentLearning) {
+                        helpMsg += "- 'aprender' 📚: Enseñar nuevas respuestas\n";
+                    }
+                    if (systemConfig.allowTeacherUserManagement) {
+                        helpMsg += "- 'gestionar usuarios' 👥: Administrar cuentas\n";
+                    }
+                    helpMsg += "- 'añadir conocimiento' ➕: Añadir información al sistema\n";
+                }
+                
+                helpMsg += "- 'buscar [tema]' 🔍: Buscar en Wikipedia\n";
+                helpMsg += "- 'ayuda' ℹ️: Mostrar esta información\n";
+                helpMsg += "\nPuedes preguntarme sobre:\n";
+                helpMsg += "- Ubicación del colegio 🏫\n";
+                helpMsg += "- Horarios ⏰\n";
+                helpMsg += "- Teléfonos 📞\n";
+                helpMsg += "- Servicios educativos 🎓\n";
+                helpMsg += "- Materias 📚\n";
+                helpMsg += "- Requisitos de inscripción 📝\n";
+                helpMsg += "- Actividades extracurriculares 🎨";
+                
+                return { response: helpMsg, needsFollowUp: false };
+            }
+
+            if (message.toLowerCase().includes("gestionar usuarios")) {
+                if (currentUser.type === 'admin' || (currentUser.type === 'teacher' && systemConfig.allowTeacherUserManagement)) {
+                    manageUsers();
+                    return { response: "IA: 👥 Abriendo panel de gestión de usuarios...", needsFollowUp: false };
+                } else {
+                    return { response: "IA: ⛔ No tienes permisos para acceder a esta función.", needsFollowUp: false };
+                }
+            }
+
+            if (message.toLowerCase().includes("panel admin") && currentUser.type === 'admin') {
+                openAdminPanel();
+                return { response: "IA: ⚙️ Abriendo panel de administración...", needsFollowUp: false };
+            }
+
+            if (message.toLowerCase().includes("añadir conocimiento") && (currentUser.type === 'admin' || currentUser.type === 'teacher')) {
+                addKnowledge();
+                return { response: "IA: ➕ Modo para añadir conocimiento activado. Por favor, escribe la pregunta que quieres añadir.", needsFollowUp: false };
+            }
+
+            // Buscar coincidencias mejorada para incluir sinónimos
+            const msgLower = message.toLowerCase();
+            for (const item of conocimiento) {
+                const questions = item.question.split('|');
+                const found = questions.some(q => msgLower.includes(q.toLowerCase()));
+                
+                if (found) {
+                    return { response: "IA: " + item.answer, needsFollowUp: false };
+                }
+            }
+
+            return { response: "IA: 🤷 No estoy seguro de cómo responder a eso. Escribe 'ayuda' para ver opciones o 'buscar [tema]' para buscar información.", needsFollowUp: false };
+        }
+
+        // Enviar mensaje
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (message === "") return;
+            
+            addMessageToChat("Usuario: " + message, 'user');
+            input.value = "";
+            
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                hideTypingIndicator();
+                const result = processMessage(message);
+                addMessageToChat(result.response, 'bot');
+                
+                if (result.needsFollowUp) {
+                    showTypingIndicator();
+                    setTimeout(() => {
+                        hideTypingIndicator();
+                        addMessageToChat("IA: 📝 Por favor, ingresa la respuesta adecuada para que pueda aprender.", 'bot');
+                    }, 1000);
+                }
+                
+                saveData();
+            }, 1000 + Math.random() * 2000);
+        }
+
+        // Borrar memoria (solo admin)
+        function clearMemory() {
+            if (currentUser.type !== 'admin') {
+                addMessageToChat("IA: ⛔ Acceso denegado. Esta función es solo para administradores.", 'bot');
+                return;
+            }
+            
+            if (confirm("⚠️ ¿Estás seguro que quieres borrar TODA la memoria del chatbot? Esto no se puede deshacer.")) {
+                localStorage.removeItem('iaColegioData');
+                conocimiento = [...initialKnowledge];
+                addMessageToChat("IA: 🗑️ Memoria borrada correctamente. Volví a los datos iniciales.", 'bot');
+                saveData();
+                showToast("Memoria del chatbot reiniciada", 'success');
+            }
+        }
+
+        // Añadir conocimiento (admin y profesores)
+        function addKnowledge() {
+            if (currentUser.type !== 'admin' && currentUser.type !== 'teacher') {
+                addMessageToChat("IA: ⛔ No tienes permisos para añadir conocimiento.", 'bot');
+                return;
+            }
+            
+            aprendiendo = true;
+            showToast("Modo aprendizaje activado", 'success');
+        }
+
+        // Mostrar ayuda
+        function showHelp() {
+            const helpMsg = processMessage("ayuda");
+            addMessageToChat(helpMsg.response, 'bot');
+        }
+
+        // Cambiar tema (solo admin)
+        function toggleTheme() {
+            if (currentUser.type !== 'admin') {
+                addMessageToChat("IA: ⛔ Función solo disponible para administradores.", 'bot');
+                return;
+            }
+            
+            if (currentTheme === 'light') {
+                document.body.setAttribute('data-theme', 'dark');
+                currentTheme = 'dark';
+                localStorage.setItem('theme', 'dark');
+                addMessageToChat("IA: 🌙 Tema oscuro activado", 'system');
+                showToast("Tema oscuro activado", 'success');
+            } else {
+                document.body.removeAttribute('data-theme');
+                currentTheme = 'light';
+                localStorage.setItem('theme', 'light');
+                addMessageToChat("IA: ☀️ Tema claro activado", 'system');
+                showToast("Tema claro activado", 'success');
+            }
+        }
+
+        // Mostrar perfil de usuario
+        function showUserProfile() {
+            userMenu.classList.remove('show');
+            let profileMsg = `📋 <strong>Mi Perfil</strong>\n`;
+            profileMsg += `👤 Usuario: ${currentUser.username}\n`;
+            profileMsg += `📧 Correo: ${currentUser.email}\n`;
+            profileMsg += `📱 Teléfono: ${currentUser.phone}\n`;
+            
+            let userType = "Alumno";
+            if (currentUser.type === 'teacher') userType = "Profesor 👨‍🏫";
+            if (currentUser.type === 'admin') userType = "Administrador 👑";
+            
+            profileMsg += `🎖️ Tipo: ${userType}\n`;
+            profileMsg += `📅 Miembro desde: ${new Date(currentUser.createdAt).toLocaleDateString()}`;
+            
+            addMessageToChat(`IA: ${profileMsg}`, 'bot');
+        }
+
+        // Gestionar usuarios (admin y profesores con permiso)
+        function manageUsers() {
+            if (currentUser.type !== 'admin' && !(currentUser.type === 'teacher' && systemConfig.allowTeacherUserManagement)) {
+                addMessageToChat("IA: ⛔ No tienes permisos para acceder a esta función.", 'bot');
+                return;
+            }
+            
+            userMenu.classList.remove('show');
+            usersModal.style.display = "block";
+            loadUsersTable();
+            showToast("Panel de gestión de usuarios abierto", 'success');
+        }
+
+        // Cargar tabla de usuarios
+        function loadUsersTable() {
+            usersTableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                let userType = "Alumno";
+                if (user.type === 'teacher') userType = "Profesor";
+                if (user.type === 'admin') userType = "Administrador";
+                
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${userType}</td>
+                    <td class="user-actions">
+                        <button class="action-btn edit" onclick="editUser('${user.username}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        ${user.username !== currentUser.username ? `
+                        <button class="action-btn delete" onclick="confirmDeleteUser('${user.username}')">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                        ${currentUser.type === 'admin' ? `
+                        <button class="action-btn promote" onclick="toggleUserType('${user.username}')">
+                            <i class="fas fa-user-shield"></i> Cambiar tipo
+                        </button>
+                        ` : ''}
+                        ` : ''}
+                    </td>
+                `;
+                
+                usersTableBody.appendChild(row);
+            });
+        }
+
+        // Mostrar formulario para agregar usuario
+        function showAddUserForm() {
+            addUserForm.style.display = "block";
+            editUserForm.style.display = "none";
+            
+            // Limpiar campos
+            document.getElementById('newUserName').value = "";
+            document.getElementById('newUserPassword').value = "";
+            document.getElementById('newUserEmail').value = "";
+            document.getElementById('newUserPhone').value = "";
+            document.getElementById('newUserType').value = "student";
+            
+            // Si es profesor, solo puede añadir alumnos
+            if (currentUser.type === 'teacher') {
+                document.getElementById('newUserType').value = "student";
+                document.getElementById('newUserType').disabled = true;
+            } else {
+                document.getElementById('newUserType').disabled = false;
+            }
+        }
+
+        // Cancelar agregar usuario
+        function cancelAddUser() {
+            addUserForm.style.display = "none";
+            showUsersError("", "success");
+        }
+
+        // Guardar nuevo usuario
+        function saveNewUser() {
+            const username = document.getElementById('newUserName').value.trim();
+            const password = document.getElementById('newUserPassword').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            const phone = document.getElementById('newUserPhone').value.trim();
+            const userType = document.getElementById('newUserType').value;
+            
+            if (!username || !password || !email) {
+                showUsersError("⚠️ Usuario, contraseña y correo son obligatorios");
+                return;
+            }
+            
+            if (users.some(u => u.username === username)) {
+                showUsersError("👤 Este nombre de usuario ya está en uso");
+                return;
+            }
+            
+            const newUser = {
+                username,
+                password: sha256(password),
+                email,
+                phone: phone || "No especificado",
+                name: username,
+                type: userType,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('chatUsers', JSON.stringify(users));
+            
+            showUsersError("✅ Usuario creado exitosamente", "success");
+            loadUsersTable();
+            cancelAddUser();
+            showToast("Usuario creado exitosamente", 'success');
+        }
+
+        // Editar usuario
+        function editUser(username) {
+            const user = users.find(u => u.username === username);
+            if (!user) return;
+            
+            editingUserId = username;
+            addUserForm.style.display = "none";
+            editUserForm.style.display = "block";
+            
+            document.getElementById('editUserName').value = user.username;
+            document.getElementById('editUserEmail').value = user.email;
+            document.getElementById('editUserPhone').value = user.phone;
+            document.getElementById('editUserType').value = user.type;
+            
+            // Si es profesor, no puede cambiar el tipo de usuario
+            if (currentUser.type === 'teacher') {
+                document.getElementById('editUserType').disabled = true;
+            } else {
+                document.getElementById('editUserType').disabled = false;
+            }
+        }
+
+        // Cancelar edición de usuario
+        function cancelEditUser() {
+            editUserForm.style.display = "none";
+            showUsersError("", "success");
+            editingUserId = null;
+        }
+
+        // Actualizar usuario
+        function updateUser() {
+            const username = document.getElementById('editUserName').value.trim();
+            const password = document.getElementById('editUserPassword').value.trim();
+            const email = document.getElementById('editUserEmail').value.trim();
+            const phone = document.getElementById('editUserPhone').value.trim();
+            const userType = document.getElementById('editUserType').value;
+            
+            if (!username || !email) {
+                showUsersError("⚠️ Usuario y correo son obligatorios");
+                return;
+            }
+            
+            const userIndex = users.findIndex(u => u.username === editingUserId);
+            if (userIndex === -1) return;
+            
+            // Verificar si el nuevo username ya existe (excepto para el mismo usuario)
+            if (users.some(u => u.username === username && u.username !== editingUserId)) {
+                showUsersError("👤 Este nombre de usuario ya está en uso");
+                return;
+            }
+            
+            const updatedUser = {
+                ...users[userIndex],
+                username,
+                email,
+                phone: phone || "No especificado",
+                type: userType
+            };
+            
+            // Actualizar contraseña solo si se proporcionó una nueva
+            if (password) {
+                updatedUser.password = sha256(password);
+            }
+            
+            users[userIndex] = updatedUser;
+            localStorage.setItem('chatUsers', JSON.stringify(users));
+            
+            // Si estamos editando nuestro propio usuario, actualizar currentUser
+            if (currentUser.username === editingUserId) {
+                currentUser = updatedUser;
+                userName.textContent = currentUser.name;
+            }
+            
+            showUsersError("✅ Usuario actualizado exitosamente", "success");
+            loadUsersTable();
+            cancelEditUser();
+            showToast("Usuario actualizado exitosamente", 'success');
+        }
+
+        // Confirmar eliminación de usuario
+        function confirmDeleteUser(username) {
+            if (confirm(`¿Estás seguro que deseas eliminar al usuario ${username}? Esta acción no se puede deshacer.`)) {
+                deleteUser(username);
+            }
+        }
+
+        // Eliminar usuario
+        function deleteUser(username) {
+            users = users.filter(u => u.username !== username);
+            localStorage.setItem('chatUsers', JSON.stringify(users));
+            
+            showUsersError("✅ Usuario eliminado exitosamente", "success");
+            loadUsersTable();
+            showToast("Usuario eliminado exitosamente", 'success');
+        }
+
+        // Cambiar tipo de usuario (solo admin)
+        function toggleUserType(username) {
+            if (currentUser.type !== 'admin') {
+                showUsersError("⛔ Solo los administradores pueden cambiar tipos de usuario", "error");
+                return;
+            }
+            
+            const userIndex = users.findIndex(u => u.username === username);
+            if (userIndex === -1) return;
+            
+            const user = users[userIndex];
+            let newType = 'student';
+            
+            if (user.type === 'student') newType = 'teacher';
+            else if (user.type === 'teacher') newType = 'admin';
+            else newType = 'student';
+            
+            users[userIndex].type = newType;
+            localStorage.setItem('chatUsers', JSON.stringify(users));
+            
+            let typeName = "Alumno";
+            if (newType === 'teacher') typeName = "Profesor";
+            if (newType === 'admin') typeName = "Administrador";
+            
+            showUsersError(`✅ Usuario cambiado a ${typeName}`, "success");
+            loadUsersTable();
+            showToast(`Usuario cambiado a ${typeName}`, 'success');
+        }
+
+        // Cerrar modal de gestión de usuarios
+        function closeUsersModalWindow() {
+            usersModal.style.display = "none";
+            addUserForm.style.display = "none";
+            editUserForm.style.display = "none";
+            editingUserId = null;
+            showUsersError("", "success");
+        }
+
+        // Abrir panel de administración
+        function openAdminPanel() {
+            if (currentUser.type !== 'admin') {
+                addMessageToChat("IA: ⛔ No tienes permisos para acceder al panel de administración.", 'bot');
+                return;
+            }
+            
+            userMenu.classList.remove('show');
+            adminPanel.style.display = "block";
+            
+            // Resetear todas las pestañas
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activar primera pestaña por defecto
+            document.querySelector('.tab').classList.add('active');
+            document.getElementById('metricsTab').classList.add('active');
+            
+            // Cargar datos
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('adminUsers').textContent = users.filter(u => u.type === 'admin').length;
+            document.getElementById('teacherUsers').textContent = users.filter(u => u.type === 'teacher').length;
+            document.getElementById('studentUsers').textContent = users.filter(u => u.type === 'student').length;
+            document.getElementById('totalInteractions').textContent = totalInteractions;
+            document.getElementById('knowledgeCount').textContent = conocimiento.length + " items";
+            
+            loadAdminUsersTable();
+            loadKnowledgeTable();
+            loadApisTable();
+            
+            document.getElementById('allowStudentLearning').checked = systemConfig.allowStudentLearning;
+            document.getElementById('allowTeacherUserManagement').checked = systemConfig.allowTeacherUserManagement;
+            document.getElementById('botName').value = systemConfig.botName;
+            document.getElementById('welcomeMessage').value = systemConfig.welcomeMessage;
+            document.getElementById('wikipediaEnabled').checked = apiConfig.wikipedia.enabled;
+            document.getElementById('wikipediaLanguage').value = apiConfig.wikipedia.language;
+            
+            showToast("Panel de administración abierto", 'success');
+        }
+
+        // Cerrar panel de administración
+        function closeAdminPanelWindow() {
+            adminPanel.style.display = "none";
+        }
+
+        // Cambiar pestaña en panel de admin
+        function changeTab(tabId) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Desactivar todos los tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activar tab seleccionado
+            document.getElementById(tabId + 'Tab').classList.add('active');
+            
+            // Activar botón del tab correspondiente
+            const tabs = document.querySelectorAll('.tab');
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabs[i].getAttribute('onclick').includes(tabId)) {
+                    tabs[i].classList.add('active');
+                    break;
+                }
+            }
+        }
+
+        // Cargar tabla de usuarios en panel admin
+        function loadAdminUsersTable() {
+            const adminUsersTableBody = document.getElementById('adminUsersTableBody');
+            adminUsersTableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                let userType = "Alumno";
+                if (user.type === 'teacher') userType = "Profesor";
+                if (user.type === 'admin') userType = "Administrador";
+                
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${userType}</td>
+                    <td class="user-actions">
+                        <button class="action-btn edit" onclick="editUserFromAdmin('${user.username}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        ${user.username !== currentUser.username ? `
+                        <button class="action-btn delete" onclick="confirmDeleteUserFromAdmin('${user.username}')">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                        <button class="action-btn promote" onclick="toggleUserTypeFromAdmin('${user.username}')">
+                            <i class="fas fa-user-shield"></i> Cambiar tipo
+                        </button>
+                        ` : ''}
+                    </td>
+                `;
+                
+                adminUsersTableBody.appendChild(row);
+            });
+        }
+
+        // Mostrar formulario para agregar usuario desde admin
+        function showAdminAddUserForm() {
+            closeAdminPanelWindow();
+            usersModal.style.display = "block";
+            showAddUserForm();
+        }
+
+        // Editar usuario desde admin
+        function editUserFromAdmin(username) {
+            closeAdminPanelWindow();
+            usersModal.style.display = "block";
+            editUser(username);
+        }
+
+        // Confirmar eliminación de usuario desde admin
+        function confirmDeleteUserFromAdmin(username) {
+            if (confirm(`¿Estás seguro que deseas eliminar al usuario ${username}? Esta acción no se puede deshacer.`)) {
+                deleteUser(username);
+                loadAdminUsersTable();
+                showAdminError("✅ Usuario eliminado exitosamente", "success");
+                showToast("Usuario eliminado exitosamente", 'success');
+            }
+        }
+
+        // Cambiar tipo de usuario desde admin
+        function toggleUserTypeFromAdmin(username) {
+            toggleUserType(username);
+            loadAdminUsersTable();
+        }
+
+        // Cargar tabla de conocimiento
+        function loadKnowledgeTable() {
+            const knowledgeTableBody = document.getElementById('knowledgeTableBody');
+            knowledgeTableBody.innerHTML = '';
+            
+            conocimiento.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${item.question.split('|').join(', ')}</td>
+                    <td>${item.answer.length > 100 ? item.answer.substring(0, 100) + '...' : item.answer}</td>
+                    <td class="user-actions">
+                        <button class="action-btn edit" onclick="editKnowledgeItem(${index})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="action-btn delete" onclick="deleteKnowledgeItem(${index})">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+                
+                knowledgeTableBody.appendChild(row);
+            });
+        }
+
+        // Cargar tabla de APIs
+        function loadApisTable() {
+            const apisTableBody = document.getElementById('apisTableBody');
+            apisTableBody.innerHTML = `
+                <tr>
+                    <td>Wikipedia</td>
+                    <td>${apiConfig.wikipedia.enabled ? '✅ Habilitada' : '❌ Deshabilitada'}</td>
+                </tr>
+            `;
+        }
+
+        // Guardar configuración de Wikipedia
+        function saveWikipediaConfig() {
+            apiConfig.wikipedia = {
+                enabled: document.getElementById('wikipediaEnabled').checked,
+                language: document.getElementById('wikipediaLanguage').value
+            };
+            localStorage.setItem('apiConfig', JSON.stringify(apiConfig));
+            showAdminError("✅ Configuración de Wikipedia guardada", "success");
+            showToast("Configuración de Wikipedia guardada", 'success');
+            loadApisTable();
+        }
+
+        // Añadir nuevo ítem de conocimiento
+        function addKnowledgeItem() {
+            const question = prompt("Ingresa la pregunta (puedes incluir sinónimos separados por |):");
+            if (!question) return;
+            
+            const answer = prompt("Ingresa la respuesta:");
+            if (!answer) return;
+            
+            conocimiento.push({ question, answer });
+            saveData();
+            loadKnowledgeTable();
+            showAdminError("✅ Conocimiento añadido exitosamente", "success");
+            showToast("Conocimiento añadido exitosamente", 'success');
+        }
+
+        // Editar ítem de conocimiento
+        function editKnowledgeItem(index) {
+            const item = conocimiento[index];
+            const newQuestion = prompt("Editar pregunta (sinónimos separados por |):", item.question);
+            if (newQuestion === null) return;
+            
+            const newAnswer = prompt("Editar respuesta:", item.answer);
+            if (newAnswer === null) return;
+            
+            conocimiento[index] = { question: newQuestion, answer: newAnswer };
+            saveData();
+            loadKnowledgeTable();
+            showAdminError("✅ Conocimiento actualizado exitosamente", "success");
+            showToast("Conocimiento actualizado exitosamente", 'success');
+        }
+
+        // Eliminar ítem de conocimiento
+        function deleteKnowledgeItem(index) {
+            if (confirm("¿Estás seguro que deseas eliminar este conocimiento?")) {
+                conocimiento.splice(index, 1);
+                saveData();
+                loadKnowledgeTable();
+                showAdminError("✅ Conocimiento eliminado exitosamente", "success");
+                showToast("Conocimiento eliminado exitosamente", 'success');
+            }
+        }
+
+        // Exportar todos los datos
+        function exportAllData() {
+            const data = {
+                users: users,
+                knowledge: conocimiento,
+                interactions: totalInteractions,
+                config: systemConfig,
+                exportedAt: new Date().toISOString(),
+                version: "2.0"
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportName = 'ia-colegio-data_' + new Date().toISOString().slice(0,10) + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportName);
+            linkElement.click();
+            
+            showAdminError("✅ Datos exportados exitosamente", "success");
+            showToast("Datos exportados exitosamente", 'success');
+        }
+
+        // Exportar usuarios a CSV
+        function exportUsersCSV() {
+            let csvContent = "Usuario,Correo,Tipo,Teléfono,Fecha de creación\n";
+            
+            users.forEach(user => {
+                let userType = "Alumno";
+                if (user.type === 'teacher') userType = "Profesor";
+                if (user.type === 'admin') userType = "Administrador";
+                
+                const createdAt = new Date(user.createdAt).toLocaleDateString();
+                
+                csvContent += `"${user.username}","${user.email}","${userType}","${user.phone}","${createdAt}"\n`;
+            });
+            
+            const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+            const exportName = 'usuarios-colegio_' + new Date().toISOString().slice(0,10) + '.csv';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportName);
+            linkElement.click();
+            
+            showAdminError("✅ Usuarios exportados a CSV exitosamente", "success");
+            showToast("Usuarios exportados a CSV exitosamente", 'success');
+        }
+
+        // Importar datos
+        function importData() {
+            const fileInput = document.getElementById('importData');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAdminError("⚠️ Por favor selecciona un archivo para importar", "error");
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm("⚠️ ¿Estás seguro que quieres importar estos datos? Esto sobrescribirá la información actual.")) {
+                        if (data.users) {
+                            users = data.users;
+                            localStorage.setItem('chatUsers', JSON.stringify(users));
+                        }
+                        
+                        if (data.knowledge) {
+                            conocimiento = data.knowledge;
+                            localStorage.setItem('iaColegioData', JSON.stringify(conocimiento));
+                        }
+                        
+                        if (data.interactions) {
+                            totalInteractions = data.interactions;
+                            localStorage.setItem('totalInteractions', totalInteractions);
+                        }
+                        
+                        if (data.config) {
+                            systemConfig = data.config;
+                            localStorage.setItem('systemConfig', JSON.stringify(systemConfig));
+                        }
+                        
+                        showAdminError("✅ Datos importados exitosamente", "success");
+                        showToast("Datos importados exitosamente", 'success');
+                        
+                        // Recargar datos en el panel
+                        document.getElementById('totalUsers').textContent = users.length;
+                        document.getElementById('adminUsers').textContent = users.filter(u => u.type === 'admin').length;
+                        document.getElementById('teacherUsers').textContent = users.filter(u => u.type === 'teacher').length;
+                        document.getElementById('studentUsers').textContent = users.filter(u => u.type === 'student').length;
+                        document.getElementById('totalInteractions').textContent = totalInteractions;
+                        document.getElementById('knowledgeCount').textContent = conocimiento.length + " items";
+                        
+                        loadAdminUsersTable();
+                        loadKnowledgeTable();
+                    }
+                } catch (e) {
+                    showAdminError("❌ Error al importar datos: " + e.message, "error");
+                    showToast("Error al importar datos", 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Guardar configuración de permisos
+        function savePermissions() {
+            systemConfig.allowStudentLearning = document.getElementById('allowStudentLearning').checked;
+            systemConfig.allowTeacherUserManagement = document.getElementById('allowTeacherUserManagement').checked;
+            
+            localStorage.setItem('systemConfig', JSON.stringify(systemConfig));
+            showAdminError("✅ Permisos guardados exitosamente", "success");
+            showToast("Permisos guardados exitosamente", 'success');
+        }
+
+        // Guardar configuración del bot
+        function saveBotConfig() {
+            systemConfig.botName = document.getElementById('botName').value;
+            systemConfig.welcomeMessage = document.getElementById('welcomeMessage').value;
+            
+            localStorage.setItem('systemConfig', JSON.stringify(systemConfig));
+            showAdminError("✅ Configuración del bot guardada exitosamente", "success");
+            showToast("Configuración del bot guardada", 'success');
+        }
+
+        // Permitir enviar con Enter
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Inicializar
+        initializeUsers();
+    </script>
+</body>
+</html>
