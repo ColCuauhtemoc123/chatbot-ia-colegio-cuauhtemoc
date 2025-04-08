@@ -2862,5 +2862,12 @@
         // Inicializar
         initializeUsers();
     </script>
+<!-- Conexión a Supabase -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = 'https://TU-ID-DE-SUPABASE.supabase.co';
+  const supabaseKey = 'TU-API-KEY';
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+</script>
 </body>
 </html>
