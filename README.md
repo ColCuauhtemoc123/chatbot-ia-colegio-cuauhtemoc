@@ -27,12 +27,9 @@ Este proyecto es un chatbot interactivo diseñado para:
 
 ## 🌐 Cómo acceder  
 El chatbot está desplegado en:  
-🔗 [https://ColCuauhtemoc123.github.io/chatbot-ia-colegio-cuauhtemoc/](https://tuusuario.github.io/chatbot-ia-colegio-cuauhtemoc/)  
+🔗 [https://ia-colegio-cuauhtemoc-cdmx.vercel.app/](https://ia-colegio-cuauhtemoc-cdmx.vercel.app/)  
 
-## 📌 ¿Cómo contribuir?  
-1. Haz fork de este repositorio  
-2. Clona el proyecto: `git clone https://github.com/tuusuario/chatbot-ia-colegio-cuauhtemoc.git`  
-3. Abre `index.html` en tu navegador  
+
 
 ## 📜 Licencia  
 Este proyecto está bajo licencia MIT.  
